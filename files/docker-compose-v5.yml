@@ -1,0 +1,63 @@
+services:
+  redis-master:
+    command:
+    - redis-server
+    - --port
+    - '6379'
+    container_name: redis-master
+    hostname: redis-master
+    image: redis
+    ports:
+    - 6379
+
+  demo:
+    container_name: demo
+    depends_on:
+      - api
+    hostname: demo
+    environment:
+      - REDIS_API_PORT=8080
+      - REDIS_API_SERVER=api
+    image: anishnath/demo:v3
+    ports:
+    - 8080
+
+  demo1:
+    container_name: demo1
+    depends_on:
+      - api
+    hostname: demo1
+    environment:
+      - REDIS_API_PORT=8080
+      - REDIS_API_SERVER=api
+    image: anishnath/demo:v4
+    ports:
+    - 8080  
+  
+  api:
+    container_name: api
+    depends_on:
+      - redis-master
+    hostname: api
+    environment:
+        - REDIS_SERVER=redis-master
+        - REDIS_PORT=6379
+    image: anishnath/demo:api
+    ports:
+    - 8080
+
+  web:
+    container_name: web
+    depends_on:
+      - demo
+      - demo1
+      - redis-master
+      - api
+    hostname: web
+    image: anishnath/demo:nginx-elb
+    ports:
+    - 80:80
+
+    
+    
+version: '3'

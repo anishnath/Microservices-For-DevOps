@@ -1,0 +1,49 @@
+FROM anishnath/demo:v1
+LABEL org.label-schema.schema-version="1.0.0-demo" \
+    maintainer="anish2good@yahoo.co.in" \
+    org.label-schema.vcs-description="Sample Redis Java Connectivity Test" \
+    org.label-schema.docker.cmd="docker run -d -p 8080:8080 " \
+    image-size="71.6MB" \
+    ram-usage="13.2MB to 70MB" \
+    cpu-usage="Low"
+
+ENV REDIS_SERVER=localhost \
+	REDIS_PORT=6379 \
+    TOMCAT_MAJOR=9 \
+    TOMCAT_VERSION=9.0.22 \
+    TOMCAT_HOME=/opt/tomcat \
+    CATALINA_HOME=/opt/tomcat \
+    CATALINA_OUT=/dev/null
+
+RUN apk add make gcc libc-dev linux-headers --update  && \
+    rm -rf /tmp/* /var/cache/apk/*
+
+
+
+RUN \
+  cd /tmp && \
+  wget http://download.redis.io/redis-stable.tar.gz && \
+  tar xvzf redis-stable.tar.gz && \
+  cd redis-stable && \
+  make && \
+  make install && \
+  cp -f src/redis-sentinel /usr/local/bin && \
+  mkdir -p /etc/redis && \
+  cp -f *.conf /etc/redis && \
+  rm -rf /tmp/redis-stable* && \
+  sed -i 's/^\(bind .*\)$/# \1/' /etc/redis/redis.conf && \
+  sed -i 's/^\(daemonize .*\)$/# \1/' /etc/redis/redis.conf && \
+  sed -i 's/^\(dir .*\)$/# \1\ndir \/data/' /etc/redis/redis.conf && \
+  sed -i 's/^\(logfile .*\)$/# \1/' /etc/redis/redis.conf
+
+# Define mountable directories.
+VOLUME ["/data"]
+
+# Define working directory.
+WORKDIR /data
+
+EXPOSE 8080 
+EXPOSE 6379 
+
+COPY monolithic.sh /data/monolithic.sh
+ENTRYPOINT ["/data/monolithic.sh"]
