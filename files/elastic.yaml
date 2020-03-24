@@ -1,0 +1,39 @@
+services:
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:7.5.2
+    hostname: elasticsearch
+    container_name: elasticsearch
+    environment:
+      - discovery.type=single-node
+      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1  
+    ports:
+      - 9200:9200
+      - 9300:9300
+
+  logstash:
+    container_name: logstash
+    depends_on:
+      - elasticsearch
+    hostname: logstash
+    image: anishnath/demo:logstash
+    ports:
+    - 5140
+
+  kibana:
+    container_name: kibana
+    hostname: kibana
+    links:
+      - elasticsearch
+      - logstash
+    image: docker.elastic.co/kibana/kibana:7.5.1
+    environment:
+      - SERVER_HOST=0.0.0.0
+      - ELASTICSEARCH_URL=http://elasticsearch:9200
+    ports:
+      - 5601:5601
+      - 5600:5600
+version: '3'
