@@ -1,0 +1,8 @@
+services:
+  demo:
+    container_name: demo
+    hostname: demo
+    image: anishnath/demo:monolithic
+    ports:
+    - 8080:8080  
+version: '3'

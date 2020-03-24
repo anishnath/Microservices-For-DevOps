@@ -15,10 +15,13 @@ services:
     depends_on:
       - api
     hostname: demo
+    deploy: 
+        mode: replicated
+        replicas: 2
     environment:
       - REDIS_API_PORT=8080
       - REDIS_API_SERVER=api
-    image: anishnath/demo:v3
+    image: anishnath/demo:v4
     ports:
     - 8080
   

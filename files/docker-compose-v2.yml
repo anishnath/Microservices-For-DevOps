@@ -8,13 +8,16 @@ services:
     hostname: redis-master
     image: redis
     ports:
-    - 6379:6379
+    - 6379
 
   demo:
     container_name: demo
     depends_on:
       - redis-master
     hostname: demo
+    deploy: 
+        mode: replicated
+        replicas: 2
     environment:
         - REDIS_SERVER=redis-master
     image: anishnath/demo:v2
